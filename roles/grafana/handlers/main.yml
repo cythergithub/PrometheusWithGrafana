@@ -1,5 +1,9 @@
-- name: "Restart the Grafana service."
-  service:
+---
+# handlers file for roles/grafana
+
+- name: restart_grafana
+  systemd:
     name: grafana-server
     state: restarted
-  listen: event_restart_grafana
+    enabled: yes
+    daemon_reload: yes

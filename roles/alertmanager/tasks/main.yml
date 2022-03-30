@@ -70,3 +70,8 @@
     url: http://localhost:9093
     method: GET
     status_code: 200
+  register: __result
+  until: __result.status == 200
+  retries: 60
+  delay: 1
+

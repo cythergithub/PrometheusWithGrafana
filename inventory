@@ -2,12 +2,10 @@
 ip_of_server
 
 [node_exporter]
-ip_of_worker
+ip_of_workers
 
 [alertmanager]
 ip_of_server
 
 [grafana]
 ip_of_server
-
-

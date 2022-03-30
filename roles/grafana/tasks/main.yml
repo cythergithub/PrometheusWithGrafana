@@ -1,13 +1,13 @@
+
 - name: Install grafana
-  yum:
-    name: https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-{{ version }}-1.x86_64.rpm
-    state: latest
+  apt:
+    deb: https://dl.grafana.com/oss/release/grafana_{{ version }}_amd64.deb
 
 - name: "Grafana configuration file copy"
   template:
     src: "grafana.conf.j2"
     dest: /etc/grafana/grafana.ini
-  notify: event_restart_grafana
+  notify: restart_grafana
 
 - name: "Grafana server started"
   service:
@@ -20,3 +20,36 @@
     url: http://127.0.0.1:3000
     method: GET
     status_code: 200
+  register: __result
+  until: __result.status == 200
+  retries: 60
+  delay: 1
+
+- name: Change grafana admin password
+  shell : "grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+  register: __command_admin
+  changed_when: __command_admin.rc !=0
+
+- name: Add Prometheus Datasource
+  grafana_datasource:
+    name: "prometheus-local"
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"
+    org_id: "1"
+    ds_type: "prometheus"
+    ds_url: "http://127.0.0.1:9090"
+  changed_when: false
+
+- name: install node exporter dashboard
+  get_url:
+    url: https://raw.githubusercontent.com/rfrail3/grafana-dashboards/master/prometheus/node-exporter-full.json
+    dest: /var/lib/grafana/node-exporter.json
+    mode: '0755'
+
+- name: activate dashboard for node exporter
+  template:
+    src: dashboard-node-exporter.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard-node-exporter.yml
+    mode: 0755
+  notify: restart_grafana

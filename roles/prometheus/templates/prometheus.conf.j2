@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True"
 global:
   scrape_interval: 15s
 
@@ -10,11 +11,11 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-      {% for host in groups['node_exporter'] %}
-      {% if inventory_hostname != host %}
+    {% for host in groups['node_exporter'] %}
+    {% if inventory_hostname != host %}
         - '{{ host }}:9100'
-      {% endif %}
-      {% endfor %}
+    {% endif %}
+    {% endfor %}
 
 rule_files:
   - alert.rules.yml
