@@ -1,11 +1,13 @@
 [prometheus]
-18.219.214.78
+ip_of_server
 
 [node_exporter]
-18.222.105.189
+ip_of_worker
 
 [alertmanager]
-18.219.214.78
+ip_of_server
 
 [grafana]
-18.223.203.246
+ip_of_server
+
+
