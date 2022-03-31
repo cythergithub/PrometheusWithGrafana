@@ -1,4 +1,4 @@
 ---
 version: 8.4.4
 grafana_admin_user: admin
-grafana_admin_password: myadminpassword
+grafana_admin_password: myverystrongadminpassword

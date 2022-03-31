@@ -22,7 +22,7 @@
     status_code: 200
   register: __result
   until: __result.status == 200
-  retries: 60
+  retries: 15
   delay: 1
 
 - name: Change grafana admin password
@@ -31,7 +31,7 @@
   changed_when: __command_admin.rc !=0
 
 - name: Add Prometheus Datasource
-  grafana_datasource:
+  community.grafana.grafana_datasource:
     name: "prometheus-local"
     grafana_url: "http://127.0.0.1:3000"
     grafana_user: "{{ grafana_admin_user }}"
@@ -40,6 +40,19 @@
     ds_type: "prometheus"
     ds_url: "http://127.0.0.1:9090"
   changed_when: false
+
+- name: install blackbox exporter dashboard
+  get_url:
+    url: https://raw.githubusercontent.com/aaabramov/grafana-dashboards/master/blackbox-exporter/blackbox-exporter.json
+    dest: /var/lib/grafana/blackbox-exporter.json
+    mode: '0755'
+    
+- name: activate dashboard for blackbox exporter
+  template:
+    src: dashboard-blackbox-exporter.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard-blackbox-exporter.yml
+    mode: 0755
+  notify: restart_grafana
 
 - name: install node exporter dashboard
   get_url:
@@ -53,3 +66,14 @@
     dest: /etc/grafana/provisioning/dashboards/dashboard-node-exporter.yml
     mode: 0755
   notify: restart_grafana
+
+- name: Add Loki Datasource
+  community.grafana.grafana_datasource:
+    name: "loki-local"
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"
+    org_id: "1"
+    ds_type: "loki"
+    ds_url: "http://127.0.0.1:3100"
+  changed_when: false

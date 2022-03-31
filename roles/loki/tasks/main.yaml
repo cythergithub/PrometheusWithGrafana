@@ -1,0 +1,74 @@
+- name: Creating loki user group
+  group: name="{{groupId}}"
+  become: true
+
+- name: Creating loki user
+  user:
+    name: "{{userId}}"
+    group: "{{groupId}}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{userId}} nologin User"
+    createhome: "no"
+    state: present
+  
+- name: Install zip
+  apt:
+    name: zip
+
+- name: Install loki
+  unarchive:
+    src: "https://github.com/grafana/loki/releases/download/v{{ version }}/loki-linux-amd64.zip"
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy loki file to bin
+  copy:
+    src: "/tmp/loki-linux-amd64"
+    dest: "/usr/local/bin/loki"
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    remote_src: yes
+    mode: 0755
+
+- name: Delete loki tmp folder
+  file:
+    path: '/tmp/loki-linux-amd64'
+    state: absent
+
+- name: Creates loki conf directory
+  file:
+    path: '/etc/loki'
+    state: directory
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0775
+
+
+- name: "Loki configuration file copy"
+  template:
+    src: "loki-local-config.yaml.j2"
+    dest: /etc/loki/loki-local-config.yaml
+
+
+- name: Copy systemd init file
+  template:
+    src: init.service.j2
+    dest: /etc/systemd/system/loki.service
+  notify: systemd_reload
+
+- name: Start loki service
+  service:
+    name: loki
+    state: started
+    enabled: yes
+
+- name: Check if loki is accessible
+  uri:
+    url: http://localhost:3100/config
+    method: GET
+    status_code: 200
+  register: __result
+  until: __result.status == 200
+  retries: 15
+  delay: 1

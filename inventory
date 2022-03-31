@@ -1,8 +1,14 @@
 [prometheus]
 ip_of_server
 
+[loki]
+ip_of_server
+
 [node_exporter]
 ip_of_workers
+
+[blackbox_exporter]
+ip_or_domain_of_targets
 
 [alertmanager]
 ip_of_server

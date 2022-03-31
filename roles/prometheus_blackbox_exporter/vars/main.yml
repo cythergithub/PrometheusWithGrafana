@@ -1,0 +1,6 @@
+---
+serviceName: "blackbox_exporter"
+userId: "blackbox_exporter"
+groupId: "blackbox_exporter"
+exec_command: "/usr/local/bin/blackbox_exporter --config.file=/etc/blackbox_exporter/blackbox.yaml"
+version: 0.20.0

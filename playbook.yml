@@ -1,10 +1,17 @@
 ---
-- hosts: alertmanager
+- hosts: prometheus
   become: yes
   become_user: root
   become_method: sudo
   roles:
-    - alertmanager
+    - prometheus_blackbox_exporter
+
+- hosts: node_exporter
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - nginx
 
 - hosts: node_exporter
   become: yes
@@ -19,6 +26,20 @@
   become_method: sudo
   roles:
     - prometheus
+
+- hosts: alertmanager
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - alertmanager
+  
+- hosts: loki
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - loki
 
 - hosts: grafana
   become: yes
